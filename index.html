@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoo Animal Bingo Sheets Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f8ff;
+        }
+        .controls {
+            background: white;
+            border: 3px solid #2c5530;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .controls h2 {
+            color: #2c5530;
+            margin-top: 0;
+        }
+        .control-group {
+            margin: 15px 0;
+        }
+        .control-group label {
+            display: inline-block;
+            margin-right: 10px;
+            font-weight: bold;
+            color: #2c5530;
+        }
+        .control-group input {
+            padding: 8px;
+            border: 2px solid #2c5530;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 80px;
+            text-align: center;
+        }
+        .control-group select {
+            padding: 8px;
+            border: 2px solid #2c5530;
+            border-radius: 5px;
+            font-size: 16px;
+            background: white;
+            color: #2c5530;
+            font-weight: bold;
+        }
+        .zoo-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .zoo-info {
+            background-color: #e8f5e8;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+            color: #2c5530;
+        }
+        .generate-button, .print-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin: 0 10px;
+        }
+        .generate-button:hover, .print-button:hover {
+            background: linear-gradient(45deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .coffee-button {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(45deg, #FF813F, #FF6B35);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .coffee-button:hover {
+            background: linear-gradient(45deg, #FF6B35, #FF5722);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        .bingo-sheet {
+            background: white;
+            border: 3px solid #2c5530;
+            border-radius: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            page-break-after: always;
+            max-width: 600px;
+        }
+        .bingo-header {
+            text-align: center;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .bingo-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .sheet-number {
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0;
+            background-color: #2c5530;
+            border: 3px solid #2c5530;
+            border-radius: 8px;
+        }
+        .bingo-cell {
+            background-color: white;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            color: #2c5530;
+            position: relative;
+            min-height: 80px;
+            border: 2px solid #2c5530;
+            box-sizing: border-box;
+        }
+        .bingo-cell.free {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #8B4513;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .animal-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        .animal-name {
+            line-height: 1.1;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+        .instructions {
+            background-color: #e8f5e8;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .instructions h3 {
+            color: #2c5530;
+            margin-top: 0;
+        }
+        .instructions ul {
+            color: #2c5530;
+            margin-bottom: 0;
+        }
+        #bingoContainer {
+            display: none;
+        }
+        @media print {
+            body { margin: 10px; }
+            .controls { display: none; }
+            .bingo-sheet { 
+                page-break-after: always;
+                margin: 10px 0;
+            }
+            .print-button {
+                display: none;
+            }
+            .coffee-button {
+                display: none;
+            }
+            .bingo-cell {
+                border: 2px solid #2c5530 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .bingo-grid {
+                border: 3px solid #2c5530 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            #bingoContainer {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<button class="print-button" onclick="window.print()" style="display: none;">🖨️ Print All Sheets</button>
+
+<a href="https://buymeacoffee.com/goldsziggy" target="_blank" class="coffee-button">
+    ☕ Buy me a coffee
+</a>
+
+<div class="controls">
+    <h2>🦁 Zoo Animal Bingo Generator 🦁</h2>
+    
+    <div class="zoo-selector">
+        <label for="zooSelect">Choose your zoo:</label>
+        <select id="zooSelect" onchange="updateZooInfo()">
+            <option value="racine">Racine Zoo</option>
+            <option value="milwaukee">Milwaukee County Zoo</option>
+        </select>
+    </div>
+    
+    <div id="zooInfo" class="zoo-info">
+        <strong>Racine Zoo</strong> - 51 animals available for bingo cards
+    </div>
+    
+    <div class="control-group">
+        <label for="sheetCount">Number of sheets to generate:</label>
+        <input type="number" id="sheetCount" min="1" max="20" value="5">
+    </div>
+    <div class="control-group">
+        <button class="generate-button" onclick="generateBingoSheets()">🎲 Generate Random Bingo Sheets</button>
+    </div>
+    <p style="color: #2c5530; margin-top: 15px;">
+        <strong>Instructions:</strong> Choose your zoo, enter the number of unique bingo sheets you want (1-20), then click generate. 
+        Each sheet will have 24 randomly selected animals from your chosen zoo's collection!
+    </p>
+</div>
+
+<div id="bingoContainer"></div>
+
+<script>
+// Zoo animals data organized by zoo
+const zooData = {
+    racine: {
+        name: "Racine Zoo",
+        animals: [
+            // Mammals
+            { name: "African Lion", emoji: "🦁", category: "Mammals" },
+            { name: "Amur Tiger", emoji: "🐅", category: "Mammals" },
+            { name: "Andean Bear", emoji: "🐻", category: "Mammals" },
+            { name: "Arctic Fox", emoji: "🦦", category: "Mammals" },
+            { name: "Barbados Sheep", emoji: "🐑", category: "Mammals" },
+            { name: "Black-Handed Spider Monkey", emoji: "🐵", category: "Mammals" },
+            { name: "Cape Porcupine", emoji: "🦔", category: "Mammals" },
+            { name: "Canada Lynx", emoji: "🐱", category: "Mammals" },
+            { name: "Common Wallaroo", emoji: "🦘", category: "Mammals" },
+            { name: "Domestic Pig", emoji: "🐷", category: "Mammals" },
+            { name: "Eastern Black Rhinoceros", emoji: "🦏", category: "Mammals" },
+            { name: "Emperor Tamarin", emoji: "🐒", category: "Mammals" },
+            { name: "Ferret", emoji: "🐾", category: "Mammals" },
+            { name: "Fossa", emoji: "🐾", category: "Mammals" },
+            { name: "Hartmann's Mountain Zebra", emoji: "🦓", category: "Mammals" },
+            { name: "Long-Tailed Chinchilla", emoji: "🐨", category: "Mammals" },
+            { name: "Masai Giraffe", emoji: "🦒", category: "Mammals" },
+            { name: "Nigerian Dwarf Goat", emoji: "🐐", category: "Mammals" },
+            { name: "Nubian Goat", emoji: "🐐", category: "Mammals" },
+            { name: "Orangutan", emoji: "🐒", category: "Mammals" },
+            { name: "Prehensile-Tailed Porcupine", emoji: "🦔", category: "Mammals" },
+            { name: "Red Kangaroo", emoji: "🦘", category: "Mammals" },
+            { name: "Southern 3-banded Armadillo", emoji: "🦦", category: "Mammals" },
+            { name: "Western Grey Kangaroo", emoji: "🦘", category: "Mammals" },
+            { name: "Western Tufted Deer", emoji: "🦌", category: "Mammals" },
+            { name: "White-Handed Gibbon", emoji: "🐒", category: "Mammals" },
+            { name: "Fennec Fox", emoji: "🦊", category: "Mammals" },
+            
+            // Birds
+            { name: "African Penguin", emoji: "🐧", category: "Birds" },
+            { name: "Bald Eagle", emoji: "🦅", category: "Birds" },
+            { name: "Budgerigar", emoji: "🐦", category: "Birds" },
+            { name: "Emu", emoji: "🦢", category: "Birds" },
+            { name: "Great Horned Owl", emoji: "🦉", category: "Birds" },
+            { name: "Red-Tailed Hawk", emoji: "🦅", category: "Birds" },
+            { name: "Tawny Frogmouth", emoji: "🐦", category: "Birds" },
+            { name: "White Umbrella Cockatoo", emoji: "🦜", category: "Birds" },
+            { name: "Yellow-Crowned Amazon", emoji: "🦜", category: "Birds" },
+            
+            // Reptiles
+            { name: "African Spurred Tortoise", emoji: "🐢", category: "Reptiles" },
+            { name: "Amazon Tree Boa", emoji: "🐍", category: "Reptiles" },
+            { name: "Ball Python", emoji: "🐍", category: "Reptiles" },
+            { name: "Blanding's Turtle", emoji: "🐢", category: "Reptiles" },
+            { name: "Inland Bearded Dragon", emoji: "🦎", category: "Reptiles" },
+            { name: "Leopard Gecko", emoji: "🦎", category: "Reptiles" },
+            { name: "New Caledonia Giant Gecko", emoji: "🦎", category: "Reptiles" },
+            { name: "Ornate Box Turtle", emoji: "🐢", category: "Reptiles" },
+            { name: "Prehensile-Tailed Skink", emoji: "🦎", category: "Reptiles" },
+            { name: "Red Tegu", emoji: "🦎", category: "Reptiles" },
+            { name: "Red Cornsnake", emoji: "🐍", category: "Reptiles" },
+            { name: "Rough-scaled Plated Lizard", emoji: "🦎", category: "Reptiles" },
+            { name: "Spiney Tailed Lizard", emoji: "🦎", category: "Reptiles" },
+            
+            // Amphibians
+            { name: "Colorado River Toad", emoji: "🐸", category: "Amphibians" },
+            { name: "Milk Frog", emoji: "🐸", category: "Amphibians" },
+            
+            // Fish
+            { name: "Mbuna Cichlid", emoji: "🐟", category: "Fish" },
+            
+            // Invertebrates
+            { name: "Brazilian Salmon Pink Tarantula", emoji: "🕷️", category: "Invertebrates" },
+            { name: "Madagascar Hissing Cockroach", emoji: "🪳", category: "Invertebrates" },
+            { name: "Asian Forest Scorpion", emoji: "🦂", category: "Invertebrates" }
+        ]
+    },
+    milwaukee: {
+        name: "Milwaukee County Zoo",
+        animals: [
+            // Mammals (24)
+            { name: "African Lion", emoji: "🦁", category: "Mammals" },
+            { name: "Amur Tiger", emoji: "🐅", category: "Mammals" },
+            { name: "Snow Leopard", emoji: "🐆", category: "Mammals" },
+            { name: "Jaguar", emoji: "🐅", category: "Mammals" },
+            { name: "Cheetah", emoji: "🐆", category: "Mammals" },
+            { name: "Grizzly Bear", emoji: "🐻", category: "Mammals" },
+            { name: "Reticulated Giraffe", emoji: "🦒", category: "Mammals" },
+            { name: "African Savanna Elephant", emoji: "🐘", category: "Mammals" },
+            { name: "Plains Zebra", emoji: "🦓", category: "Mammals" },
+            { name: "Hippopotamus", emoji: "🦛", category: "Mammals" },
+            { name: "Bactrian Camel", emoji: "🐪", category: "Mammals" },
+            { name: "Red Panda", emoji: "🐼", category: "Mammals" },
+            { name: "Kangaroo", emoji: "🦘", category: "Mammals" },
+            { name: "North American River Otter", emoji: "🦦", category: "Mammals" },
+            { name: "Prairie Dog", emoji: "🐹", category: "Mammals" },
+            { name: "Badger", emoji: "🦡", category: "Mammals" },
+            { name: "Caribou", emoji: "🦌", category: "Mammals" },
+            { name: "Alpaca", emoji: "🦙", category: "Mammals" },
+            { name: "Fennec Fox", emoji: "🦊", category: "Mammals" },
+            { name: "Eastern Bongo", emoji: "🦌", category: "Mammals" },
+            { name: "Spotted Hyena", emoji: "🐺", category: "Mammals" },
+            { name: "Common Waterbuck", emoji: "🦌", category: "Mammals" },
+            { name: "Impala", emoji: "🦌", category: "Mammals" },
+            { name: "Scimitar-Horned Oryx", emoji: "🦌", category: "Mammals" },
+            
+            // Primates (6)
+            { name: "Western Lowland Gorilla", emoji: "🦍", category: "Primates" },
+            { name: "Bornean Orangutan", emoji: "🦧", category: "Primates" },
+            { name: "Bonobo", emoji: "🐒", category: "Primates" },
+            { name: "Japanese Macaque", emoji: "🐒", category: "Primates" },
+            { name: "Siamang", emoji: "🐒", category: "Primates" },
+            { name: "Cotton-top Tamarin", emoji: "🐒", category: "Primates" },
+            
+            // Birds (10)
+            { name: "Rockhopper Penguin", emoji: "🐧", category: "Birds" },
+            { name: "Gentoo Penguin", emoji: "🐧", category: "Birds" },
+            { name: "Humboldt Penguin", emoji: "🐧", category: "Birds" },
+            { name: "Caribbean Flamingo", emoji: "🦩", category: "Birds" },
+            { name: "Whooping Crane", emoji: "🕊️", category: "Birds" },
+            { name: "Bali Myna", emoji: "🐦", category: "Birds" },
+            { name: "Rhinoceros Hornbill", emoji: "🐦", category: "Birds" },
+            { name: "Scarlet Ibis", emoji: "🐦", category: "Birds" },
+            { name: "Greater Rhea", emoji: "🦢", category: "Birds" },
+            { name: "Cinereous Vulture", emoji: "🦅", category: "Birds" },
+            
+            // Reptiles & Amphibians (9)
+            { name: "Green Anaconda", emoji: "🐍", category: "Reptiles" },
+            { name: "Chinese Alligator", emoji: "🐊", category: "Reptiles" },
+            { name: "Gila Monster", emoji: "🦎", category: "Reptiles" },
+            { name: "King Cobra", emoji: "🐍", category: "Reptiles" },
+            { name: "Poison Dart Frog", emoji: "🐸", category: "Amphibians" },
+            { name: "Panther Chameleon", emoji: "🦎", category: "Reptiles" },
+            { name: "Eastern Fox Snake", emoji: "🐍", category: "Reptiles" },
+            { name: "Fly River Turtle", emoji: "🐢", category: "Reptiles" },
+            { name: "Grand Cayman Blue Iguana", emoji: "🦎", category: "Reptiles" },
+            
+            // Fish & Aquatic (5)
+            { name: "Arapaima", emoji: "🐟", category: "Aquatic" },
+            { name: "Silver Dollar Fish", emoji: "🐟", category: "Aquatic" },
+            { name: "Silver Arowana", emoji: "🐟", category: "Aquatic" },
+            { name: "Harbor Seal", emoji: "🦭", category: "Aquatic" },
+            { name: "California Sheephead", emoji: "🐟", category: "Aquatic" },
+            
+            // Invertebrates & Others (4)
+            { name: "Pink Sea Starfish", emoji: "⭐", category: "Invertebrates" },
+            { name: "Leather Starfish", emoji: "⭐", category: "Invertebrates" },
+            { name: "Giant Pacific Octopus", emoji: "🐙", category: "Invertebrates" },
+            { name: "Frilled Dragon", emoji: "🦎", category: "Reptiles" }
+        ]
+    }
+};
+
+// Get current zoo's animals
+function getCurrentZooAnimals() {
+    const selectedZoo = document.getElementById('zooSelect').value;
+    return zooData[selectedZoo].animals;
+}
+
+// Update zoo info display
+function updateZooInfo() {
+    const selectedZoo = document.getElementById('zooSelect').value;
+    const zooInfo = document.getElementById('zooInfo');
+    const zoo = zooData[selectedZoo];
+    zooInfo.innerHTML = `<strong>${zoo.name}</strong> - ${zoo.animals.length} animals available for bingo cards`;
+}
+
+// Shuffle array function
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+// Generate random selection of animals for a bingo sheet
+function getRandomAnimals(count = 24) {
+    const animals = getCurrentZooAnimals();
+    const shuffled = shuffleArray(animals);
+    return shuffled.slice(0, count);
+}
+
+// Create a single bingo sheet
+function createBingoSheet(sheetNumber, animals) {
+    const selectedZoo = document.getElementById('zooSelect').value;
+    const zooName = zooData[selectedZoo].name;
+    
+    const sheet = document.createElement('div');
+    sheet.className = 'bingo-sheet';
+    
+    // Create 5x5 grid with animals (FREE space in center)
+    const gridAnimals = [...animals];
+    gridAnimals.splice(12, 0, { name: "FREE SPACE", emoji: "", special: true });
+    
+    sheet.innerHTML = `
+        <div class="bingo-header">
+            <h1 class="bingo-title">${zooName.toUpperCase()} BINGO</h1>
+            <div class="sheet-number">Sheet #${sheetNumber}</div>
+        </div>
+        <div class="bingo-grid">
+            ${gridAnimals.map(animal => {
+                if (animal.special) {
+                    return `<div class="bingo-cell free"><div class="animal-name">FREE SPACE</div></div>`;
+                }
+                return `
+                    <div class="bingo-cell">
+                        <div class="animal-icon">${animal.emoji}</div>
+                        <div class="animal-name">${animal.name}</div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ul>
+                <li>Look for each animal as you visit ${zooName}</li>
+                <li>Mark off each animal you spot</li>
+                <li>Try to get 5 in a row (horizontal, vertical, or diagonal)</li>
+                <li>The FREE space is already marked for you!</li>
+            </ul>
+        </div>
+    `;
+    
+    return sheet;
+}
+
+// Generate multiple bingo sheets
+function generateBingoSheets() {
+    const sheetCount = parseInt(document.getElementById('sheetCount').value);
+    const container = document.getElementById('bingoContainer');
+    const printButton = document.querySelector('.print-button');
+    const animals = getCurrentZooAnimals();
+    
+    // Validate input
+    if (sheetCount < 1 || sheetCount > 20) {
+        alert('Please enter a number between 1 and 20');
+        return;
+    }
+    
+    // Check if zoo has enough animals for unique sheets
+    if (animals.length < 24) {
+        alert(`${zooData[document.getElementById('zooSelect').value].name} only has ${animals.length} animals. You need at least 24 animals for a bingo sheet.`);
+        return;
+    }
+    
+    // Clear existing sheets
+    container.innerHTML = '';
+    
+    // Generate sheets
+    for (let i = 1; i <= sheetCount; i++) {
+        const selectedAnimals = getRandomAnimals(24);
+        const sheet = createBingoSheet(i, selectedAnimals);
+        container.appendChild(sheet);
+    }
+    
+    // Show the container and print button
+    container.style.display = 'block';
+    printButton.style.display = 'block';
+    
+    // Scroll to the first sheet
+    container.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Allow Enter key to generate sheets
+document.getElementById('sheetCount').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        generateBingoSheets();
+    }
+});
+</script>
+
+</body>
+</html>
