@@ -111,6 +111,14 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
+        @media (max-width: 768px) {
+            .coffee-button {
+                display: none;
+            }
+            .coffee-button.show-mobile {
+                display: flex;
+            }
+        }
         .bingo-sheet {
             background: white;
             border: 3px solid #2c5530;
@@ -493,6 +501,7 @@ function generateBingoSheets() {
     const sheetCount = parseInt(document.getElementById('sheetCount').value);
     const container = document.getElementById('bingoContainer');
     const printButton = document.querySelector('.print-button');
+    const coffeeButton = document.querySelector('.coffee-button');
     const animals = getCurrentZooAnimals();
     
     // Validate input
@@ -517,9 +526,12 @@ function generateBingoSheets() {
         container.appendChild(sheet);
     }
     
-    // Show the container and print button
+    // Show the container and buttons
     container.style.display = 'block';
     printButton.style.display = 'block';
+    
+    // Show coffee button on mobile after generation
+    coffeeButton.classList.add('show-mobile');
     
     // Scroll to the first sheet
     container.scrollIntoView({ behavior: 'smooth' });
